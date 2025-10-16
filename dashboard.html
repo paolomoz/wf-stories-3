@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adobe Experience Manager - Wells Fargo Stories Migration</title>
+    <link rel="stylesheet" href="https://unpkg.com/@spectrum-css/vars@3.0.1/dist/spectrum-global.css">
+    <link rel="stylesheet" href="https://unpkg.com/@spectrum-css/vars@3.0.1/dist/spectrum-medium.css">
+    <link rel="stylesheet" href="https://unpkg.com/@spectrum-css/vars@3.0.1/dist/spectrum-light.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
+            color: #2c2c2c;
+        }
+
+        .aem-shell {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 1000;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hamburger {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            color: #505050;
+        }
+
+        .adobe-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #2c2c2c;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .adobe-logo-icon {
+            width: 20px;
+            height: 20px;
+            background: #EB1000;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: #2c2c2c;
+            font-size: 13px;
+        }
+
+        .top-bar-right > span {
+            cursor: pointer;
+            color: #505050;
+        }
+
+        .top-bar-icon {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            color: #505050;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            background: #D7373F;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #1473E6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 48px;
+            width: 64px;
+            height: calc(100vh - 48px);
+            background: #ffffff;
+            border-right: 1px solid #e1e1e1;
+            overflow-y: auto;
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar-item {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover {
+            background: #f5f5f5;
+        }
+
+        .sidebar-item.active {
+            background: #2c2c2c;
+            color: white;
+        }
+
+        .sidebar-item svg {
+            width: 20px;
+            height: 20px;
+            color: #505050;
+        }
+
+        .sidebar-item.active svg {
+            color: white;
+        }
+
+        .sidebar-separator {
+            width: 32px;
+            height: 1px;
+            background: #e1e1e1;
+            margin: 16px 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 64px;
+            margin-top: 48px;
+            padding: 0;
+            width: calc(100% - 64px);
+            height: calc(100vh - 48px);
+            overflow-y: auto;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #FFF4E6 0%, #E3F2FD 50%, #F3E5F5 100%);
+            padding: 48px 32px 32px;
+            position: relative;
+        }
+
+        .welcome-header {
+            font-size: 32px;
+            font-weight: 300;
+            color: #2c2c2c;
+            margin-bottom: 24px;
+        }
+
+        .search-bar {
+            max-width: 800px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 120px 12px 16px;
+            border: 1px solid #b8b8b8;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1473E6;
+            box-shadow: 0 0 0 1px #1473E6;
+        }
+
+        .search-submit {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 6px 16px;
+            background: #f5f5f5;
+            border: 1px solid #b8b8b8;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            color: #2c2c2c;
+        }
+
+        .search-submit:hover {
+            background: #e1e1e1;
+        }
+
+        .content-section {
+            padding: 32px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .action-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #b8b8b8;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            color: #2c2c2c;
+        }
+
+        .action-button:hover {
+            background: #fafafa;
+            border-color: #8e8e8e;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .alert-card {
+            background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            border: 1px solid #FFB74D;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .info-card-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #2c2c2c;
+        }
+
+        .info-card-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #505050;
+        }
+
+        .info-card-content h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin: 16px 0 8px 0;
+        }
+
+        .info-card-content h4:first-child {
+            margin-top: 0;
+        }
+
+        .info-card-content ul {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .info-card-content li {
+            margin-bottom: 8px;
+        }
+
+        .info-card-content strong {
+            color: #1473E6;
+        }
+
+        .alert-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        .alert-link {
+            color: #1473E6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .alert-link:hover {
+            text-decoration: underline;
+        }
+
+        .alert-items {
+            margin: 16px 0;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: start;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #2c2c2c;
+        }
+
+        .alert-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            color: #D84315;
+            margin-top: 2px;
+        }
+
+        .alert-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: #2c2c2c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 16px;
+            font-family: inherit;
+        }
+
+        .alert-button:hover {
+            background: #1a1a1a;
+        }
+
+        .link-external {
+            color: #1473E6;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .link-external:hover {
+            text-decoration: underline;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: white;
+            border: 1px solid #e1e1e1;
+            border-radius: 12px;
+            padding: 24px 20px;
+            text-align: left;
+        }
+
+        .metric-icon {
+            width: 24px;
+            height: 24px;
+            color: #505050;
+            margin-bottom: 12px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6e6e6e;
+            font-weight: 400;
+            margin-bottom: 8px;
+            text-transform: none;
+        }
+
+        .metric-value {
+            font-size: 40px;
+            font-weight: 700;
+            color: #2c2c2c;
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+
+        .metric-subtitle {
+            font-size: 12px;
+            color: #6e6e6e;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .metric-subtitle svg {
+            width: 12px;
+            height: 12px;
+            color: #2D9D78;
+        }
+
+        .metric-subtitle .positive {
+            color: #2D9D78;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-bottom: 16px;
+            scroll-margin-top: 80px;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #fafafa;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            color: #505050;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid #e1e1e1;
+            font-size: 14px;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        tbody tr:first-child td {
+            border-top: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .status-pending {
+            background: #F5F5F5;
+            color: #6e6e6e;
+        }
+
+        .page-link {
+            color: #1473E6;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .page-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Progress Bar */
+        .spectrum-ProgressBar {
+            position: relative;
+            display: inline-flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .spectrum-ProgressBar-track {
+            height: 6px;
+            border-radius: 3px;
+            background-color: rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .spectrum-ProgressBar-fill {
+            height: 100%;
+            background-color: #2c2c2c;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .spectrum-ProgressBar-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c2c2c;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="aem-shell">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <div class="hamburger">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2 4h16v2H2V4zm0 5h16v2H2V9zm0 5h16v2H2v-2z"/>
+                    </svg>
+                </div>
+                <div class="adobe-logo">
+                    <div class="adobe-logo-icon">Ae</div>
+                    <span>Adobe Experience Manager</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <span>Foundation Internal</span>
+                <div class="top-bar-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2a6 6 0 016 6v1.5l1.5 3v1.5h-15v-1.5l1.5-3V8a6 6 0 016-6zm-1 15h2a1 1 0 01-2 0z"/>
+                    </svg>
+                </div>
+                <div class="top-bar-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M18 2H2C.9 2 0 2.9 0 4v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H2V6l8 5 8-5v10zM10 9L2 4h16l-8 5z"/>
+                    </svg>
+                </div>
+                <div class="top-bar-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm1 13H9v-2h2v2zm0-4H9V6h2v5z"/>
+                    </svg>
+                </div>
+                <div class="top-bar-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2a6 6 0 016 6c0 2.61-1.67 4.81-4 5.63V16c0 1.1-.9 2-2 2s-2-.9-2-2v-2.37C5.67 12.81 4 10.61 4 8a6 6 0 016-6z"/>
+                    </svg>
+                    <div class="notification-badge">1</div>
+                </div>
+                <div class="top-bar-icon">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M5 5h2v2H5V5zm0 4h2v2H5V9zm0 4h2v2H5v-2zm4-8h2v2H9V5zm0 4h2v2H9V9zm0 4h2v2H9v-2zm4-8h2v2h-2V5zm0 4h2v2h-2V9zm0 4h2v2h-2v-2z"/>
+                    </svg>
+                </div>
+                <div class="user-avatar">P</div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Binoculars -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 8h3M18 8h3M6 5v3M18 5v3M8 8a3 3 0 11-6 0 3 3 0 016 0zM22 8a3 3 0 11-6 0 3 3 0 016 0zM8 11v8a3 3 0 11-6 0v-8M22 11v8a3 3 0 11-6 0v-8M8 11h8"/>
+                </svg>
+            </div>
+
+            <!-- Home (Active) -->
+            <div class="sidebar-item active">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path d="M9 22V12h6v10" fill="none" stroke="white" stroke-width="2"/>
+                </svg>
+            </div>
+
+            <!-- Cards/Layers -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="7" width="18" height="12" rx="2"/>
+                    <rect x="5" y="4" width="14" height="3" rx="1"/>
+                    <path d="M7 13h10M7 17h6"/>
+                </svg>
+            </div>
+
+            <!-- Archive/Box -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="8" width="18" height="12" rx="2"/>
+                    <path d="M3 8l9-5 9 5M10 12h4"/>
+                </svg>
+            </div>
+
+            <!-- Film/Clapperboard -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M2 11h20M7 7l-2 4M12 7l-2 4M17 7l-2 4M22 7l-2 4"/>
+                </svg>
+            </div>
+
+            <!-- Pencil/Edit -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                </svg>
+            </div>
+
+            <!-- Calendar -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/>
+                    <path d="M3 10h18M8 2v4M16 2v4"/>
+                </svg>
+            </div>
+
+            <!-- Table/Grid -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+                </svg>
+            </div>
+
+            <!-- Tag -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                    <circle cx="7" cy="7" r="1" fill="currentColor"/>
+                </svg>
+            </div>
+
+            <!-- Folder with magnifying glass -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2v11z"/>
+                    <circle cx="11" cy="14" r="2"/>
+                    <path d="M12.5 15.5L14 17"/>
+                </svg>
+            </div>
+
+            <!-- Shield -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+            </div>
+
+            <!-- Separator -->
+            <div class="sidebar-separator"></div>
+
+            <!-- Cloud with gear -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
+                    <circle cx="12" cy="10" r="2"/>
+                    <path d="M12 7v1M12 12v1M15 10h-1M9 10H8"/>
+                </svg>
+            </div>
+
+            <!-- Cloud with chart -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
+                    <path d="M10 15v-2M12 15v-4M14 15v-3"/>
+                </svg>
+            </div>
+
+            <!-- Download -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                </svg>
+            </div>
+
+            <!-- People with gear -->
+            <div class="sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <circle cx="19" cy="14" r="2"/>
+                    <path d="M19 11v1M19 16v1M21 14h-1M17 14h-1"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="hero-section">
+                <h1 class="welcome-header">Welcome, Paolo!</h1>
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Ask me anything...">
+                    <button class="search-submit">
+                        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M3 10l7-7 7 7-1.41 1.41L10 5.83l-5.59 5.58L3 10z" transform="rotate(90 10 10)"/>
+                        </svg>
+                        Submit
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-section">
+                <div class="action-buttons">
+                    <button class="action-button">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4h12v2H4V4zm0 4h12v2H4V8zm0 4h12v2H4v-2z"/>
+                        </svg>
+                        View Migration Report
+                    </button>
+                    <button class="action-button">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4h5v5H4V4zm7 0h5v5h-5V4zM4 11h5v5H4v-5zm7 0h5v5h-5v-5z"/>
+                        </svg>
+                        Manage Pages
+                    </button>
+                    <button class="action-button">
+                        <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 3a2.5 2.5 0 110 5 2.5 2.5 0 010-5z"/>
+                        </svg>
+                        Team Access
+                    </button>
+                </div>
+
+                <div class="content-grid">
+                    <div class="alert-card">
+                        <div class="alert-header">
+                            Migration Progress: 8 category pages successfully migrated to AEM for <a href="https://stories.wf.com/" class="alert-link" target="_blank">stories.wf.com</a>
+                        </div>
+                        <div class="spectrum-ProgressBar" style="margin: 16px 0;">
+                            <div class="spectrum-ProgressBar-track">
+                                <div class="spectrum-ProgressBar-fill" style="width: 15%;"></div>
+                            </div>
+                            <div class="spectrum-ProgressBar-label" style="font-size: 12px; color: #2c2c2c; margin-top: 8px;">15% Complete</div>
+                        </div>
+                        <div class="alert-items">
+                            <div class="alert-item">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 12H9v-2h2v2zm0-4H9V6h2v4z"/>
+                                </svg>
+                                <span><strong>10% of pages migrated</strong> - 8 of 80 total pages now on AEM</span>
+                            </div>
+                            <div class="alert-item">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 12H9v-2h2v2zm0-4H9V6h2v4z"/>
+                                </svg>
+                                <span><strong>15% project completion</strong> - Foundation architecture and design patterns established</span>
+                            </div>
+                            <div class="alert-item">
+                                <svg viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 12H9v-2h2v2zm0-4H9V6h2v4z"/>
+                                </svg>
+                                <span><strong>10:1 efficiency ratio</strong> - 2 weeks saved with AI-assisted development in just 2 hours</span>
+                            </div>
+                        </div>
+                        <a href="#migrated-pages" class="alert-button" style="text-decoration: none;">
+                            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3 10l7-7 7 7-1.41 1.41L10 5.83l-5.59 5.58L3 10z" transform="rotate(90 10 10)"/>
+                            </svg>
+                            View detailed report
+                        </a>
+                        <a href="#" class="link-external" style="margin-left: 16px;">About AEM</a>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-card-header">Business Value Delivered</div>
+                        <div class="info-card-content">
+                            <h4>Unmatched Performance</h4>
+                            <ul>
+                                <li><strong>100 Lighthouse scores</strong> across all metrics</li>
+                                <li><strong>25-40% improvement</strong> in Core Web Vitals</li>
+                                <li>Sub-second load times = higher search rankings</li>
+                            </ul>
+
+                            <h4>AI Integration & Discovery</h4>
+                            <ul>
+                                <li>Enhanced discoverability in <strong>ChatGPT Search, Perplexity, Gemini</strong></li>
+                                <li>Semantic HTML optimized for LLM parsing</li>
+                                <li>Positions Wells Fargo as <strong>authoritative source</strong> for AI-cited financial advice</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                        </svg>
+                        <div class="metric-label">Total Pages</div>
+                        <div class="metric-value">80</div>
+                        <div class="metric-subtitle">62 Articles + 14 Categories + 4 Static</div>
+                    </div>
+                    <div class="metric-card">
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <path d="M22 4L12 14.01l-3-3"/>
+                        </svg>
+                        <div class="metric-label">Pages Migrated</div>
+                        <div class="metric-value">8</div>
+                        <div class="metric-subtitle">
+                            <svg viewBox="0 0 12 12" fill="currentColor">
+                                <path d="M6 2l4 4H7v4H5V6H2l4-4z"/>
+                            </svg>
+                            <span class="positive">10%</span>
+                            <span>of total site</span>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v6l4 2"/>
+                        </svg>
+                        <div class="metric-label">Project Complete</div>
+                        <div class="metric-value">15%</div>
+                        <div class="metric-subtitle">Foundation established</div>
+                    </div>
+                    <div class="metric-card">
+                        <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        <div class="metric-label">Time Invested</div>
+                        <div class="metric-value">2hrs</div>
+                        <div class="metric-subtitle">Active Agent Use</div>
+                    </div>
+                </div>
+
+                <div id="migrated-pages" class="section-title">Migrated Pages</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Original URL</th>
+                                <th>AEM Preview URL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Building Wealth</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/building-wealth/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/your-money/building-wealth" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Money Management</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/money-management/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/your-money/money-management" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fraud and Scam Prevention</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/fraud-and-scam-prevention/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/your-money/fraud-and-scam-prevention" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>B2B Insights</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/b2b-insights/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/your-business/b2b-insights" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Small Business Success</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/small-business-success/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/your-business/small-business-success" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Innovation</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/innovation/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/our-impact/innovation" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sustainability</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/sustainability/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/our-impact/sustainability" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Housing Resources</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-success">Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/housing-resources/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td><a href="https://main--wf-stories-3--paolomoz.aem.page/our-impact/housing-resources" class="page-link" target="_blank">View AEM ↗</a></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Personal Finance Tips</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/personal-finance-tips/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Credit and Debt Management</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/credit-debt-management/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Retirement Planning</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/retirement-planning/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tax Planning</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/tax-planning/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Investment Strategies</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/investment-strategies/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Insurance and Risk Management</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/insurance-risk-management/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Financial Planning</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/financial-planning/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Homeownership</strong></td>
+                                <td>Your Money</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-money/homeownership/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Business Banking</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/business-banking/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cash Flow Management</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/cash-flow-management/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Commercial Real Estate</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/commercial-real-estate/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Business Insurance</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/business-insurance/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Merchant Services</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/merchant-services/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Workforce Solutions</strong></td>
+                                <td>Your Business</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/your-business/workforce-solutions/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Community Development</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/community-development/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Diversity and Inclusion</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/diversity-inclusion/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Environmental Sustainability</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/environmental-sustainability/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Financial Education</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/financial-education/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Affordable Housing</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/affordable-housing/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Economic Empowerment</strong></td>
+                                <td>Our Impact</td>
+                                <td><span class="status-badge status-pending">Not Migrated</span></td>
+                                <td><a href="https://stories.wf.com/our-impact/economic-empowerment/" class="page-link" target="_blank">View page ↗</a></td>
+                                <td>—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
