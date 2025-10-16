@@ -16,5 +16,33 @@ export default async function decorate(block) {
   const footer = document.createElement('div');
   while (fragment.firstElementChild) footer.append(fragment.firstElementChild);
 
+  // Add classes to sections for styling (2 ribbons)
+  const sections = footer.querySelectorAll(':scope > div');
+
+  // Ribbon 1: Social Media
+  if (sections.length >= 1) {
+    sections[0].classList.add('footer-social');
+
+    // Add icon support for social media links
+    const socialList = sections[0].querySelector('ul');
+    if (socialList) {
+      socialList.querySelectorAll('a').forEach((link) => {
+        const text = link.textContent.toLowerCase().trim();
+        link.classList.add('social-link', `social-${text}`);
+        // Create icon wrapper
+        const icon = document.createElement('span');
+        icon.classList.add('social-icon');
+        icon.setAttribute('aria-label', link.textContent);
+        link.textContent = '';
+        link.appendChild(icon);
+      });
+    }
+  }
+
+  // Ribbon 2: Footer Links + Copyright
+  if (sections.length >= 2) {
+    sections[1].classList.add('footer-links-copyright');
+  }
+
   block.append(footer);
 }
